@@ -9,6 +9,8 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseInMemoryDatabase("ProductDb");
 });
 
+builder.Services.AddHealthChecks();
+
 var app = builder.Build();
 
 app.MapGet(string.Empty, () => "Welcome to the Product Web API!");
@@ -25,5 +27,6 @@ app.MapGet("products", async (ApplicationDbContext context, CancellationToken ca
     return Results.Ok(products);
 });
 
+app.MapHealthChecks("/health");
 
 app.Run();
