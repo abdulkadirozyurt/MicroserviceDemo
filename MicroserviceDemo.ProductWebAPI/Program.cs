@@ -20,6 +20,7 @@ app.MapGet("products", async (ApplicationDbContext context, CancellationToken ca
     var products = await context.Products.ToListAsync(cancellationToken);
     products.Add(new Product
     {
+        Id=Guid.Parse("6a18b9d2-9537-4c12-86de-70bb61192ee0"),
         Name = "Smartphone",
         StockAmount = 50,
     });
