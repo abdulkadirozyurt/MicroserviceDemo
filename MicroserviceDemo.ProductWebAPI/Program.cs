@@ -1,6 +1,7 @@
 using MicroserviceDemo.ProductWebAPI.Context;
 using MicroserviceDemo.ProductWebAPI.Models;
 using Microsoft.EntityFrameworkCore;
+using Steeltoe.Discovery.Consul;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +11,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 });
 
 builder.Services.AddHealthChecks();
+builder.Services.AddConsulDiscoveryClient();
 
 var app = builder.Build();
 

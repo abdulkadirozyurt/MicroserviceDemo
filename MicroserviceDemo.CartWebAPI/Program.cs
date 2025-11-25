@@ -1,6 +1,9 @@
+using Consul;
 using MicroserviceDemo.CartWebAPI.Context;
 using MicroserviceDemo.CartWebAPI.Models;
 using Microsoft.EntityFrameworkCore;
+using Steeltoe.Common.Discovery;
+using Steeltoe.Discovery.Consul;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,11 +13,21 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 });
 
 builder.Services.AddHttpClient();
+builder.Services.AddConsulDiscoveryClient();
 
 var app = builder.Build();
 
-app.MapGet("carts", async (ApplicationDbContext context, HttpClient client) =>
+app.MapGet("carts",
+    async (
+        ApplicationDbContext context,
+        IDiscoveryClient discoveryClient,
+        HttpClient client,
+        CancellationToken cancellationToken) =>
 {
+    var productServiceEndpoints = await discoveryClient.GetInstancesAsync("ProductWebAPI", cancellationToken);
+    var productApiEndpoint = productServiceEndpoints.First().Uri;
+
+    
     var carts = await context.Carts.ToListAsync();
     carts.Add(new Cart
     {
@@ -22,7 +35,7 @@ app.MapGet("carts", async (ApplicationDbContext context, HttpClient client) =>
         QuantityPerUnit = 1
     });
 
-    var products = await client.GetFromJsonAsync<List<Product>>("http://localhost:6001/products");
+    var products = await client.GetFromJsonAsync<List<Product>>($"{productApiEndpoint}products");
 
     var cartsResult = carts.Select(s => new
     {

@@ -1,21 +1,31 @@
 # MicroserviceDemo
 
-A simple Microservice demonstration project built with .NET 10.0, showcasing a Product Web API using Minimal APIs and Entity Framework Core with an In-Memory database.
+A demonstration of microservices architecture built with .NET 10.0, showcasing communication between services using Minimal APIs, Entity Framework Core (In-Memory), and HttpClient.
 
 ## Tech Stack
 
 - **Framework**: .NET 10.0
 - **Database**: Entity Framework Core (In-Memory)
 - **API Style**: Minimal APIs
+- **Communication**: HttpClient
 
 ## Project Structure
 
-The solution consists of a single microservice:
+The solution consists of two microservices:
 
-- **MicroserviceDemo.ProductWebAPI**: The main Web API project handling product operations.
-  - `Models/Product.cs`: Defines the Product entity.
-  - `Context/ApplicationDbContext.cs`: EF Core database context.
-  - `Program.cs`: Application entry point and API endpoint definitions.
+### 1. MicroserviceDemo.ProductWebAPI
+The core service responsible for managing product data.
+- **Port**: `6001`
+- **Responsibilities**:
+  - Provides product information.
+  - Seeds demo data.
+
+### 2. MicroserviceDemo.CartWebAPI
+A service that manages user carts and aggregates product details.
+- **Port**: `6010`
+- **Responsibilities**:
+  - Manages cart items.
+  - Communicates with `ProductWebAPI` to fetch product names.
 
 ## Getting Started
 
@@ -36,34 +46,42 @@ The solution consists of a single microservice:
 
 ### Running the Application
 
-Run the Product Web API project:
+You need to run both microservices simultaneously. Open two terminal windows:
 
+**Terminal 1 - Product Service:**
 ```bash
 dotnet run --project MicroserviceDemo.ProductWebAPI
 ```
+*Runs on http://localhost:6001*
 
-The application will start, and you can access the endpoints.
+**Terminal 2 - Cart Service:**
+```bash
+dotnet run --project MicroserviceDemo.CartWebAPI
+```
+*Runs on http://localhost:6010*
 
 ## API Endpoints
 
-### GET /products
+### Product Service (Port 6001)
 
+#### `GET /products`
 Retrieves a list of all products.
-
-- **URL**: `/products`
-- **Method**: `GET`
 - **Response**: JSON array of products.
 
-**Example Response:**
+### Cart Service (Port 6010)
 
+#### `GET /carts`
+Retrieves a list of carts with enriched product details.
+- **Response**: JSON array of cart items including product names fetched from the Product Service.
+
+**Example Response:**
 ```json
 [
   {
-    "id": "01935e62-8975-7312-9226-c220ef3533fb",
+    "id": "0193630f-5e88-724d-b039-019310287532",
+    "productId": "6a18b9d2-9537-4c12-86de-70bb61192ee0",
     "name": "Smartphone",
-    "stockAmount": 50
+    "quantityPerUnit": 1
   }
 ]
 ```
-
-*Note: The application seeds a demo "Smartphone" product every time the `/products` endpoint is called for demonstration purposes.*
