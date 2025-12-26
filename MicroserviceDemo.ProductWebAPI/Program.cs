@@ -11,13 +11,13 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 });
 
 builder.Services.AddHealthChecks();
-builder.Services.AddConsulDiscoveryClient();
+//builder.Services.AddConsulDiscoveryClient();
 
 var app = builder.Build();
 
 app.MapGet(string.Empty, () => "Welcome to the Product Web API!");
 
-app.MapGet("products", async (ApplicationDbContext context, CancellationToken cancellationToken) =>
+app.MapGet("getall", async (ApplicationDbContext context, CancellationToken cancellationToken) =>
 {
     var products = await context.Products.ToListAsync(cancellationToken);
     products.Add(new Product
