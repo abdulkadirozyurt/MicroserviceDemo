@@ -8,13 +8,14 @@ A demonstration of microservices architecture built with .NET 10.0, showcasing s
 - **Service Discovery**: [Consul](https://www.consul.io/)
 - **Client Library**: [Steeltoe](https://steeltoe.io/)
 - **Resilience**: [Polly](https://www.thepollyproject.org/) (Retry & Timeout policies)
+- **API Gateway**: [Ocelot](https://ocelot.readthedocs.io/)
 - **Database**: Entity Framework Core (In-Memory)
 - **API Style**: Minimal APIs
 - **Communication**: HttpClient with Service Discovery
 
 ## Project Structure
 
-The solution consists of two microservices that communicate via Consul Service Discovery and use Polly for fault tolerance:
+The solution consists of three main components that communicate via Consul Service Discovery and use Polly for fault tolerance:
 
 ### 1. MicroserviceDemo.ProductWebAPI
 The core service responsible for managing product data.
@@ -34,6 +35,13 @@ A service that manages user carts and aggregates product details.
   - Uses **Polly Resilience Pipelines** (Retry & Timeout) for robust service-to-service communication.
   - Manages cart items.
   - Aggregates data from the Product Service.
+
+### 3. MicroserviceDemo.Gateway
+The entry point for the microservices architecture.
+- **Port**: `5001`
+- **Responsibilities**:
+  - Routes requests to the appropriate microservice using Ocelot.
+  - Provides a unified API surface for clients.
 
 ## Getting Started
 
@@ -68,7 +76,7 @@ consul agent -dev
 ```
 
 #### 2. Start Microservices
-Open two terminal windows:
+Open three terminal windows:
 
 **Terminal 1 - Product Service:**
 ```bash
@@ -82,7 +90,21 @@ dotnet run --project MicroserviceDemo.CartWebAPI
 ```
 *Runs on http://localhost:6010 and discovers Product Service via Consul.*
 
+**Terminal 3 - Gateway:**
+```bash
+dotnet run --project MicroserviceDemo.Gateway
+```
+*Runs on http://localhost:5001 and routes requests to services.*
+
 ## API Endpoints
+
+### Gateway (Port 5001) - Recommended Entry Point
+
+#### `GET /api/products/getall`
+Routes to Product Service `GET /getall`.
+
+#### `GET /api/carts/getall`
+Routes to Cart Service `GET /getall`.
 
 ### Product Service (Port 6001)
 
@@ -92,13 +114,13 @@ Returns a welcome message.
 #### `GET /health`
 Health check endpoint used by Consul.
 
-#### `GET /products`
+#### `GET /getall`
 Retrieves a list of all products.
 - **Response**: JSON array of products.
 
 ### Cart Service (Port 6010)
 
-#### `GET /carts`
+#### `GET /getall`
 Retrieves a list of carts with enriched product details (fetched dynamically from Product Service).
 - **Response**: JSON array of cart items including product names.
 - **Resilience**: This endpoint uses a Polly pipeline with:
