@@ -11,7 +11,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 });
 
 builder.Services.AddHealthChecks();
-//builder.Services.AddConsulDiscoveryClient();
+builder.Services.AddConsulDiscoveryClient();
 
 var app = builder.Build();
 

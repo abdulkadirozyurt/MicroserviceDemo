@@ -11,6 +11,18 @@
           "Port": 6001
         }
       ]
+    },
+    {
+      "UpstreamHttpMethod": [ "GET", "POST" ],
+      "UpstreamPathTemplate": "/api/carts/{everything}",
+      "DownstreamPathTemplate": "/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 6010
+        }
+      ]
     }
   ],
   "GlobalConfiguration": {

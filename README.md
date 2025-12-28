@@ -60,7 +60,7 @@ You need to run Consul and both microservices.
 #### 1. Start Consul
 If you have Docker installed, you can run Consul with:
 ```bash
-docker run -d -p 8500:8500 --name consul consul
+docker run -d --name consul -p 8500:8500 hashicorp/consul:latest
 ```
 Or run the binary directly:
 ```bash

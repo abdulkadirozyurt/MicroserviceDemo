@@ -35,7 +35,7 @@ var app = builder.Build();
 
 
 
-app.MapGet("carts",
+app.MapGet("getall",
     async (
         ApplicationDbContext context,
         IDiscoveryClient discoveryClient,
@@ -47,7 +47,8 @@ app.MapGet("carts",
     var pipeline = resiliencePipelineProvider.GetPipeline("cart-pipeline");
 
 
-    var productServiceEndpoints = await pipeline.ExecuteAsync(async callback => await discoveryClient.GetInstancesAsync("ProductWebAPI", callback));
+    var productServiceEndpoints = await pipeline.ExecuteAsync(async callback => 
+                                            await discoveryClient.GetInstancesAsync("ProductWebAPI", callback));
     var productApiEndpoint = productServiceEndpoints.First().Uri;
 
 
@@ -59,7 +60,7 @@ app.MapGet("carts",
     });
 
     var products = await pipeline.ExecuteAsync(async callback =>
-                            client.GetFromJsonAsync<List<Product>>($"{productApiEndpoint}products", callback)).Result;
+                            client.GetFromJsonAsync<List<Product>>($"{productApiEndpoint}getall", callback)).Result;
 
 
     var cartsResult = carts.Select(s => new
