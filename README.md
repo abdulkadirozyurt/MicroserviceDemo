@@ -96,6 +96,20 @@ dotnet run --project MicroserviceDemo.Gateway
 ```
 *Runs on http://localhost:5001 and routes requests to services.*
 
+## Docker Configuration
+
+The project includes a `Dockerfile` for each service to demonstrate containerization concepts.
+
+### Multi-Stage Builds
+The Dockerfiles use **multi-stage builds** to optimize image size:
+1. **Base**: A lightweight runtime image.
+2. **Build**: A full SDK image for compiling the code.
+3. **Publish**: Prepares the binaries for deployment.
+4. **Final**: Copies only the necessary files back to the base image.
+
+### Layer Caching
+We copy the `.csproj` files and run `dotnet restore` before copying the rest of the source code. This allows Docker to cache the dependencies layer, making subsequent builds much faster if only the code changes.
+
 ## API Endpoints
 
 ### Gateway (Port 5001) - Recommended Entry Point

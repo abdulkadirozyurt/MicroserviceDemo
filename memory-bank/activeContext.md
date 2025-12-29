@@ -8,6 +8,7 @@
 - Added Ocelot Gateway.
 - Integrated Consul and Polly.
 - Updated `README.md` to include Gateway and correct endpoints.
+- Refined Docker configuration with educational comments and added Dockerfiles for all services.
 
 ## Next Steps
 - Consider adding integration tests for the gateway and services.

@@ -12,7 +12,7 @@
 ## Development Setup
 - **OS**: Windows (current environment)
 - **IDE**: VS Code
-- **Tools**: Docker (optional for Consul), .NET 10.0 SDK
+- **Tools**: Docker (used for Consul and service containerization), .NET 10.0 SDK
 
 ## Technical Constraints
 - Services must be registered with Consul to be discoverable.

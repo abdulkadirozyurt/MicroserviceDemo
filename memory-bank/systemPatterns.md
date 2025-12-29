@@ -21,3 +21,5 @@ The project follows a microservices architecture with an API Gateway.
 - **Retry Pattern**: Automatic retry of failed operations.
 - **Timeout Pattern**: Preventing long-running requests from blocking resources.
 - **Aggregator Pattern**: Cart service aggregates data from Product service.
+- **Sidecar/Service Registry Pattern**: Services register themselves with Consul for discovery.
+- **Containerization Pattern**: Multi-stage Docker builds for optimized production images.
