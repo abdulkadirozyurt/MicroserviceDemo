@@ -15,14 +15,18 @@ builder.Services.AddConsulDiscoveryClient();
 
 var app = builder.Build();
 
-app.MapGet(string.Empty, () => "Welcome to the Product Web API!");
+app.MapGet(string.Empty, () =>
+{
+    Console.WriteLine("product api working: {0}", DateTime.Now);
+    return "Welcome to the Product Web API!";
+});
 
 app.MapGet("getall", async (ApplicationDbContext context, CancellationToken cancellationToken) =>
 {
     var products = await context.Products.ToListAsync(cancellationToken);
     products.Add(new Product
     {
-        Id=Guid.Parse("6a18b9d2-9537-4c12-86de-70bb61192ee0"),
+        Id = Guid.Parse("6a18b9d2-9537-4c12-86de-70bb61192ee0"),
         Name = "Smartphone",
         StockAmount = 50,
     });

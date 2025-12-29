@@ -11,10 +11,10 @@ EXPOSE 8080
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["MicroserviceDemo.CartWebAPI.csproj", "."]
-RUN dotnet restore "./MicroserviceDemo.CartWebAPI.csproj"
+COPY ["MicroserviceDemo.CartWebAPI/MicroserviceDemo.CartWebAPI.csproj", "MicroserviceDemo.CartWebAPI/"]
+RUN dotnet restore "./MicroserviceDemo.CartWebAPI/MicroserviceDemo.CartWebAPI.csproj"
 COPY . .
-WORKDIR "/src/."
+WORKDIR "/src/MicroserviceDemo.CartWebAPI"
 RUN dotnet build "./MicroserviceDemo.CartWebAPI.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 # This stage is used to publish the service project to be copied to the final stage

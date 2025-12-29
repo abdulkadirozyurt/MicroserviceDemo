@@ -1,26 +1,33 @@
 {
   "Routes": [
     {
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
+      "UpstreamHttpMethod": ["GET", "POST", "PUT", "DELETE"],
       "UpstreamPathTemplate": "/api/products/{everything}", // client to gateway path
       "DownstreamPathTemplate": "/{everything}", // gateway to microservice path
       "DownstreamScheme": "http",
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      },
       "DownstreamHostAndPorts": [
         {
-          "Host": "product",
-          "Port": 6001
+          "Host": "product-container",
+          "Port": 8080
+        },
+        {
+          "Host": "product-container2",
+          "Port": 8080
         }
       ]
     },
     {
-      "UpstreamHttpMethod": [ "GET", "POST" ],
+      "UpstreamHttpMethod": ["GET", "POST"],
       "UpstreamPathTemplate": "/api/carts/{everything}",
       "DownstreamPathTemplate": "/{everything}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "cart",
-          "Port": 6010
+          "Host": "cart-container",
+          "Port": 8080
         }
       ]
     }
