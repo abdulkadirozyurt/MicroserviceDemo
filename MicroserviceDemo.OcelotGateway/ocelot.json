@@ -1,7 +1,7 @@
 {
   "Routes": [
     {
-      "UpstreamHttpMethod": ["GET", "POST", "PUT", "DELETE"],
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
       "UpstreamPathTemplate": "/api/products/{everything}", // client to gateway path
       "DownstreamPathTemplate": "/{everything}", // gateway to microservice path
       "DownstreamScheme": "http",
@@ -20,7 +20,7 @@
       ]
     },
     {
-      "UpstreamHttpMethod": ["GET", "POST"],
+      "UpstreamHttpMethod": [ "GET", "POST" ],
       "UpstreamPathTemplate": "/api/carts/{everything}",
       "DownstreamPathTemplate": "/{everything}",
       "DownstreamScheme": "http",
@@ -33,6 +33,22 @@
     }
   ],
   "GlobalConfiguration": {
-    "BaseUrl": "http://localhost:5001"
+    "BaseUrl": "http://localhost:5001",
+    "RateLimitOptions": {
+      // rule, partition by
+      "ClientIdHeader": "Oc-Client",
+      // "ClientWhitelist": [],
+      // management opts
+      "EnableRateLimiting": true,
+      "EnableHeaders": true,
+      // algorithm
+      "Limit": 1,
+      "Period": "1m",
+      "Wait": "3s",
+      // extended opts
+      "StatusCode": 418,
+      "QuotaMessage": "Rate limit quota exceeded.",
+      "KeyPrefix": "ocelot-rate-limiting"
+    }
   }
 }
