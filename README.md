@@ -110,6 +110,25 @@ The Dockerfiles use **multi-stage builds** to optimize image size:
 ### Layer Caching
 We copy the `.csproj` files and run `dotnet restore` before copying the rest of the source code. This allows Docker to cache the dependencies layer, making subsequent builds much faster if only the code changes.
 
+### Running with Docker
+
+To run the entire stack using Docker:
+
+1. **Build the images:**
+   ```bash
+   docker build -t product-api -f MicroserviceDemo.ProductWebAPI/Dockerfile .
+   docker build -t cart-api -f MicroserviceDemo.CartWebAPI/Dockerfile .
+   docker build -t gateway-api -f MicroserviceDemo.OcelotGateway/Dockerfile .
+   ```
+
+2. **Run the containers:**
+   *(Note: You may need to create a docker network or adjust hostnames in `ocelot.json` and `appsettings.json` for full container-to-container communication)*
+   ```bash
+   docker run -d --name product -p 6001:8080 product-api
+   docker run -d --name cart -p 6010:8080 cart-api
+   docker run -d --name gateway -p 5001:8080 gateway-api
+   ```
+
 ## API Endpoints
 
 ### Gateway (Port 5001) - Recommended Entry Point
