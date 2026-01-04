@@ -19,6 +19,7 @@ app.MapGet(string.Empty, () =>
 {
     Console.WriteLine("product api working: {0}", DateTime.Now);
     return "Welcome to the Product Web API!";
+
 });
 
 app.MapGet("getall", async (ApplicationDbContext context, CancellationToken cancellationToken) =>

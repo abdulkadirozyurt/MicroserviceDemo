@@ -41,6 +41,8 @@ The entry point for the microservices architecture.
 - **Port**: `5001`
 - **Responsibilities**:
   - Routes requests to the appropriate microservice using Ocelot.
+  - **Load Balancing**: Implements Round Robin strategy across multiple service instances.
+  - **Rate Limiting**: Protects services from excessive requests (configured for 1 request per minute per client).
   - Provides a unified API surface for clients.
 
 ## Getting Started
@@ -133,11 +135,18 @@ To run the entire stack using Docker:
 
 ### Gateway (Port 5001) - Recommended Entry Point
 
+*Note: The gateway is configured to route to container hostnames (`product-container`, `cart-container`). For local development without Docker, these hostnames may need to be adjusted in `ocelot.json`.*
+
 #### `GET /api/products/getall`
 Routes to Product Service `GET /getall`.
+- **Load Balancing**: Round-robins between `product-container` and `product-container2`.
 
 #### `GET /api/carts/getall`
 Routes to Cart Service `GET /getall`.
+
+#### Rate Limiting
+The gateway enforces a rate limit of **1 request per minute**.
+- **Exceeded Limit**: Returns `418 I'm a teapot` with the message "Rate limit quota exceeded."
 
 ### Product Service (Port 6001)
 

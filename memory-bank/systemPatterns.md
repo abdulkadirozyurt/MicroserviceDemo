@@ -23,3 +23,5 @@ The project follows a microservices architecture with an API Gateway.
 - **Aggregator Pattern**: Cart service aggregates data from Product service.
 - **Sidecar/Service Registry Pattern**: Services register themselves with Consul for discovery.
 - **Containerization Pattern**: Multi-stage Docker builds for optimized production images.
+- **Load Balancing Pattern**: Round-robin distribution of requests across multiple service instances at the gateway.
+- **Rate Limiting Pattern**: Throttling client requests to prevent service abuse.
