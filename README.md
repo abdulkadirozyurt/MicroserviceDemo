@@ -1,25 +1,28 @@
 # MicroserviceDemo
 
-A demonstration of microservices architecture built with .NET 10.0, showcasing service discovery, resilience patterns, and communication using **Consul**, **Steeltoe**, **Polly**, and **Minimal APIs**.
+A demonstration of microservices architecture built with .NET 10.0, showcasing service discovery, resilience patterns, and communication using **Consul**, **Steeltoe**, **Polly**, **YARP**, and **Minimal APIs**.
 
 ## Tech Stack
 
 - **Framework**: .NET 10.0
 - **Service Discovery**: [Consul](https://www.consul.io/)
 - **Client Library**: [Steeltoe](https://steeltoe.io/)
-- **Resilience**: [Polly](https://www.thepollyproject.org/) (Retry & Timeout policies)
-- **API Gateway**: [Ocelot](https://ocelot.readthedocs.io/)
+- **Resilience**: [Polly](https://www.thepollyproject.org/) (Retry, Timeout & Circuit Breaker policies)
+- **API Gateway**:
+  - [Ocelot](https://ocelot.readthedocs.io/)
+  - [YARP (Yet Another Reverse Proxy)](https://microsoft.github.io/reverse-proxy/)
 - **Database**: Entity Framework Core (In-Memory)
 - **API Style**: Minimal APIs
-- **Communication**: HttpClient with Service Discovery
+- **Documentation**: [Scalar](https://scalar.com/) (Integrated in YARP Gateway)
+- **Communication**: HttpClient with Service Discovery (Inter-service) & Reverse Proxy (Gateway)
 
 ## Project Structure
 
-The solution consists of three main components that communicate via Consul Service Discovery and use Polly for fault tolerance:
+The solution consists of four main components. The microservices communicate via Consul Service Discovery (Cart -> Product), while the Gateways route external traffic to the services.
 
 ### 1. MicroserviceDemo.ProductWebAPI
 The core service responsible for managing product data.
-- **Port**: `6001`
+- **Port**: `6001` (Instance 1), `6002` (Instance 2 via Docker)
 - **Service Name**: `ProductWebAPI`
 - **Responsibilities**:
   - Registers with Consul.
@@ -36,14 +39,24 @@ A service that manages user carts and aggregates product details.
   - Manages cart items.
   - Aggregates data from the Product Service.
 
-### 3. MicroserviceDemo.Gateway
-The entry point for the microservices architecture.
+### 3. MicroserviceDemo.OcelotGateway
+The classic entry point using Ocelot.
 - **Port**: `5001`
 - **Responsibilities**:
-  - Routes requests to the appropriate microservice using Ocelot.
-  - **Load Balancing**: Implements Round Robin strategy across multiple service instances.
-  - **Rate Limiting**: Protects services from excessive requests (configured for 1 request per minute per client).
-  - Provides a unified API surface for clients.
+  - Routes requests to the appropriate microservice.
+  - **Load Balancing**: Round Robin strategy across `product-container` and `product-container2`.
+  - **Rate Limiting**: Configured for 10 requests per minute.
+  - **QoS**: Implements Circuit Breaker (Breaks after 3 failures for 30s).
+  - **CORS**: Enabled for all origins.
+
+### 4. MicroserviceDemo.YarpGateway
+A modern reverse proxy entry point using YARP.
+- **Port**: `5002`
+- **Responsibilities**:
+  - High-performance routing to microservices.
+  - **Rate Limiting**: Fixed Window strategy (5 permits per 5 seconds).
+  - **Load Balancing**: Round Robin strategy.
+  - **API Documentation**: Integrates Scalar for unified API exploration.
 
 ## Getting Started
 
@@ -65,7 +78,7 @@ The entry point for the microservices architecture.
 
 ### Running the Application
 
-You need to run Consul and both microservices.
+You need to run Consul, the microservices, and at least one gateway.
 
 #### 1. Start Consul
 If you have Docker installed, you can run Consul with:
@@ -78,105 +91,81 @@ consul agent -dev
 ```
 
 #### 2. Start Microservices
-Open three terminal windows:
+Open terminals for each service:
 
-**Terminal 1 - Product Service:**
+**Product Service:**
 ```bash
 dotnet run --project MicroserviceDemo.ProductWebAPI
 ```
 *Runs on http://localhost:6001 and registers with Consul.*
 
-**Terminal 2 - Cart Service:**
+**Cart Service:**
 ```bash
 dotnet run --project MicroserviceDemo.CartWebAPI
 ```
 *Runs on http://localhost:6010 and discovers Product Service via Consul.*
 
-**Terminal 3 - Gateway:**
+**Ocelot Gateway:**
 ```bash
-dotnet run --project MicroserviceDemo.Gateway
+dotnet run --project MicroserviceDemo.OcelotGateway
 ```
-*Runs on http://localhost:5001 and routes requests to services.*
+*Runs on http://localhost:5001.*
+
+**YARP Gateway:**
+```bash
+dotnet run --project MicroserviceDemo.YarpGateway
+```
+*Runs on http://localhost:5002.*
 
 ## Docker Configuration
 
-The project includes a `Dockerfile` for each service to demonstrate containerization concepts.
+The project is fully containerized. The `docker-compose.yml` orchestrates the entire stack, including two instances of the Product Service for load balancing demonstration.
 
 ### Multi-Stage Builds
-The Dockerfiles use **multi-stage builds** to optimize image size:
-1. **Base**: A lightweight runtime image.
-2. **Build**: A full SDK image for compiling the code.
-3. **Publish**: Prepares the binaries for deployment.
-4. **Final**: Copies only the necessary files back to the base image.
-
-### Layer Caching
-We copy the `.csproj` files and run `dotnet restore` before copying the rest of the source code. This allows Docker to cache the dependencies layer, making subsequent builds much faster if only the code changes.
+The Dockerfiles use **multi-stage builds** to optimize image size and cache dependencies.
 
 ### Running with Docker
 
-To run the entire stack using Docker:
+To run the entire stack using Docker Compose (Recommended):
 
-1. **Build the images:**
+1. **Build and Run:**
    ```bash
-   docker build -t product-api -f MicroserviceDemo.ProductWebAPI/Dockerfile .
-   docker build -t cart-api -f MicroserviceDemo.CartWebAPI/Dockerfile .
-   docker build -t gateway-api -f MicroserviceDemo.OcelotGateway/Dockerfile .
+   docker-compose up -d --build
    ```
 
-2. **Run the containers:**
-   *(Note: You may need to create a docker network or adjust hostnames in `ocelot.json` and `appsettings.json` for full container-to-container communication)*
+   This will start:
+   - Consul
+   - Product Service (2 Instances)
+   - Cart Service
+   - Ocelot Gateway (Port 5001)
+   - YARP Gateway (Port 5002)
+
+2. **Verify Containers:**
    ```bash
-   docker run -d --name product -p 6001:8080 product-api
-   docker run -d --name cart -p 6010:8080 cart-api
-   docker run -d --name gateway -p 5001:8080 gateway-api
+   docker ps
    ```
 
 ## API Endpoints
 
-### Gateway (Port 5001) - Recommended Entry Point
+### Gateways (Recommended Entry Points)
 
-*Note: The gateway is configured to route to container hostnames (`product-container`, `cart-container`). For local development without Docker, these hostnames may need to be adjusted in `ocelot.json`.*
+You can use either Gateway. They route to container hostnames (`product-container`, `cart-container`).
 
-#### `GET /api/products/getall`
-Routes to Product Service `GET /getall`.
-- **Load Balancing**: Round-robins between `product-container` and `product-container2`.
+| Endpoint | Description | Ocelot (5001) | YARP (5002) |
+|----------|-------------|---------------|-------------|
+| **Get Products** | List all products | `GET /api/products/getall` | `GET /api/products/getall` |
+| **Get Carts** | List carts with details | `GET /api/carts/getall` | `GET /api/carts/getall` |
 
-#### `GET /api/carts/getall`
-Routes to Cart Service `GET /getall`.
+### Resilience & Behavior
 
-#### Rate Limiting
-The gateway enforces a rate limit of **1 request per minute**.
-- **Exceeded Limit**: Returns `418 I'm a teapot` with the message "Rate limit quota exceeded."
+- **Load Balancing**: Repeated requests to `/api/products/getall` will cycle between the two Product Service instances (check logs or headers if available).
+- **Rate Limiting**:
+  - **Ocelot**: Returns `418 I'm a teapot` if > 10 req/min.
+  - **YARP**: Returns `503 Service Unavailable` (default) or `429` if > 5 req/5s.
+- **Circuit Breaker (Ocelot)**: If the Product Service fails 3 times, Ocelot will open the circuit for 30s.
 
-### Product Service (Port 6001)
+### Service Direct Access (Localhost)
 
-#### `GET /`
-Returns a welcome message.
-
-#### `GET /health`
-Health check endpoint used by Consul.
-
-#### `GET /getall`
-Retrieves a list of all products.
-- **Response**: JSON array of products.
-
-### Cart Service (Port 6010)
-
-#### `GET /getall`
-Retrieves a list of carts with enriched product details (fetched dynamically from Product Service).
-- **Response**: JSON array of cart items including product names.
-- **Resilience**: This endpoint uses a Polly pipeline with:
-  - **Retry**: 3 attempts with a 10-second delay.
-  - **Timeout**: 30 seconds.
-
-**Example Response:**
-```json
-[
-  {
-    "id": "0193630f-5e88-724d-b039-019310287532",
-    "productId": "6a18b9d2-9537-4c12-86de-70bb61192ee0",
-    "name": "Smartphone",
-    "quantityPerUnit": 1
-  }
-]
-```
+- **Product Service**: `http://localhost:6001/getall`
+- **Cart Service**: `http://localhost:6010/getall`
+- **Consul UI**: `http://localhost:8500`
