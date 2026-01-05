@@ -19,9 +19,9 @@
         }
       ],
       "QoSOptions": {
-        "MinimumThroughput": 3,     // try count before applying circuit breaker
-        "Timeout": 10000,           // waiting time value for each requests from downstream (so microservice) response
-        "BreakDuration": 30000      // duration for which circuit breaker will be active, so lock requests to microservice for this duration
+        "MinimumThroughput": 3, // try count before applying circuit breaker
+        "Timeout": 10000, // waiting time value for each requests from downstream (so microservice) response
+        "BreakDuration": 30000 // duration for which circuit breaker will be active, so lock requests to microservice for this duration
       }
     },
     {

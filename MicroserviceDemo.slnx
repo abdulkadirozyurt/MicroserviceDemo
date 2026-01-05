@@ -2,4 +2,5 @@
   <Project Path="MicroserviceDemo.CartWebAPI/MicroserviceDemo.CartWebAPI.csproj" Id="e5f51084-2976-439a-ad2b-ff699be91765" />
   <Project Path="MicroserviceDemo.OcelotGateway/MicroserviceDemo.OcelotGateway.csproj" />
   <Project Path="MicroserviceDemo.ProductWebAPI/MicroserviceDemo.ProductWebAPI.csproj" />
+  <Project Path="MicroserviceDemo.YarpGateway/MicroserviceDemo.YarpGateway.csproj" Id="d705b914-5eea-4626-b5d5-7b1f430cf505" />
 </Solution>

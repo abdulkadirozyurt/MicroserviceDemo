@@ -6,7 +6,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Configuration.SetBasePath(builder.Environment.ContentRootPath)
                     .AddJsonFile("ocelot.json");
-//builder.Services.AddOcelot(builder.Configuration).AddPolly();
+builder.Services.AddOcelot(builder.Configuration).AddPolly();
 
 builder.Services.AddCors();
 
@@ -23,6 +23,6 @@ app.UseCors(x => x
 app.MapGet("/", () => "Hello World!");
 
 
-//await app.UseOcelot();
+await app.UseOcelot();
 
 await app.RunAsync();
