@@ -10,7 +10,9 @@ builder.Services.AddOcelot(builder.Configuration).AddPolly();
 
 builder.Services.AddCors();
 
+
 var app = builder.Build();
+
 
 app.UseCors(x => x
 .AllowAnyHeader()
